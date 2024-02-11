@@ -6,3 +6,6 @@ just add
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 in the beginning of /etc/resolv.conf
+
+https://en.wikipedia.org/wiki/Debian_version_history
+to check debian releases. Bullseye being the penultimate stable release atm.

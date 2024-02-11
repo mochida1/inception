@@ -16,6 +16,8 @@ services:
       restart: unless-stopped
       ports:
         - "3306:3306/tcp"
+      volumes:
+        - mdb_data:/var/lib/mysql
     
     wordpress:
       build: ./requirements/wordpress
@@ -24,3 +26,10 @@ services:
       restart: unless-stopped
       ports:
         - "9000:9000/tcp"
+
+volumes:
+    wp_data:
+        # using external volume created in custom directory
+        external: true
+    mdb_data:
+        external: true
