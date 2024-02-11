@@ -1,35 +1,72 @@
-version: '3'
+version: '3.8'
 
 services:
-    nginx:
-      build: ./requirements/nginx
-      image: img_nginx
-      container_name: nginx
-      restart: unless-stopped
-      ports:
-        - "443:443"
-
     mariadb:
       build: ./requirements/mariadb
-      image: img_mariadb
-      container_name: mariadb
+      image: mariadb
+      container_name: MARIADB
       restart: unless-stopped
+      env_file:
+        - .env
       ports:
-        - "3306:3306/tcp"
+        - "3306:3306"
+      environment:
+        - "MYSQL_HOST=mariadb:3306"
+        - "MYSQL_DATABASE=wordpress"
+        - "MYSQL_USER=${MYSQL_USER}"
+        - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
       volumes:
         - mdb_data:/var/lib/mysql
-    
-    wordpress:
-      build: ./requirements/wordpress
-      image: img_wordpress
-      container_name: wordpress
+      networks:
+        - inception-nw
+
+    nginx:
+      depends_on:
+        - wordpress
+      build: ./requirements/nginx
+      image: nginx
+      container_name: NGINX
       restart: unless-stopped
+      env_file:
+        - .env
+      environment:
+        - "DOMAIN_NAME=${DOMAIN_NAME}"
+        - "CERTS_=${CERTS_}"
+        - "CERT_KEY_=${CERT_KEY_}"
+      volumes:
+        - wp_data:/var/www/hmochida/wordpress
       ports:
-        - "9000:9000/tcp"
+        - "443:443"
+      networks:
+        - inception-nw
+
+    wordpress:
+      depends_on:
+            - mariadb
+      build: ./requirements/wordpress
+      image: wordpress
+      container_name: WORDPRESS
+      restart: unless-stopped
+      env_file:
+        - .env
+      environment:
+        - "MYSQL_HOST=mariadb:3306"
+        - "MYSQL_DATABASE=wordpress"
+        - "MYSQL_USER=${MYSQL_USER}"
+        - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+      volumes:
+        - wp_data:/var/www/hmochida/wordpress
+      ports:
+        - "9000:9000"
+      networks:
+        - inception-nw
 
 volumes:
     wp_data:
-        # using external volume created in custom directory
         external: true
     mdb_data:
         external: true
+
+networks:
+    inception-nw:
+        driver: bridge

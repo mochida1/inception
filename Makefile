@@ -6,7 +6,7 @@
 #    By: mochida <mochida@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/07 16:43:14 by mochida           #+#    #+#              #
-#    Updated: 2024/01/07 19:47:09 by mochida          ###   ########.fr        #
+#    Updated: 2024/02/10 10:19:40 by mochida          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,8 +20,8 @@ VOL_BASE_DIR = /home/hmochida/data
 
 
 all: directories
-	docker volume create --name mdb_data --opt type=none --opt device=$(VOL_BASE_DIR)/$(MARIADB_VOL_DIR) --opt o=bind
-	docker volume create --name wp_data --opt type=none --opt device=$(VOL_BASE_DIR)/$(WP_VOL_DIR) --opt o=bind
+	sudo docker volume create --name mdb_data --opt type=none --opt device=$(VOL_BASE_DIR)/$(MARIADB_VOL_DIR) --opt o=bind
+	sudo docker volume create --name wp_data --opt type=none --opt device=$(VOL_BASE_DIR)/$(WP_VOL_DIR) --opt o=bind
 	cd src && sudo docker-compose up --build
 
 directories:
@@ -33,9 +33,9 @@ directories:
 clean: fclean
 
 fclean:
-		cd src && docker-compose down
-		docker system prune -af --volumes
-		docker volume prune -f
+		cd src && sudo docker-compose down
+		sudo docker system prune -af --volumes
+		sudo docker volume prune -f
 		echo "deleting docker volumes"
 		@docker volume rm mdb_data -f
 		@docker volume rm wp_data -f
