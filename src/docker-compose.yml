@@ -1,26 +1,56 @@
-version: '3'
+version: "3"
 
 services:
-    nginx:
-      build: ./requirements/nginx
-      image: img_nginx
-      container_name: nginx
-      restart: unless-stopped
-      ports:
-        - "443:443"
+  mariadb:
+    container_name: mariadb
+    image: mariadb
+    build: ./requirements/mariadb
+    env_file: .env
+    networks:
+      - inception
+    expose:
+      - "3306"
+    volumes:
+      - mdb_data:/var/lib/mysql
+    restart: always
+  
+  wordpress:
+    container_name: wordpress
+    image: wordpress
+    build: ./requirements/wordpress
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+    expose:
+      - "9000"
+    volumes:
+      - wp_data:/var/www/hmochida
+    env_file: .env
+    restart: always
+  
+  nginx:
+    container_name: nginx
+    image: nginx
+    build: ./requirements/nginx
+    networks:
+      - inception
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      - wp_data:/var/www/hmochida
+    env_file: .env
+    restart: always
 
-    mariadb:
-      build: ./requirements/mariadb
-      image: img_mariadb
-      container_name: mariadb
-      restart: unless-stopped
-      ports:
-        - "3306:3306/tcp"
-    
-    wordpress:
-      build: ./requirements/wordpress
-      image: img_wordpress
-      container_name: wordpress
-      restart: unless-stopped
-      ports:
-        - "9000:9000/tcp"
+networks:
+  inception:
+    driver: bridge
+
+volumes:
+  wp_data:
+    external: true
+
+  mdb_data:
+    external: true

@@ -1,13 +1,24 @@
-FROM debian:bookworm
+FROM debian:oldstable
 
-WORKDIR /
+RUN apt update &&\
+	apt upgrade -y &&\
+    apt install -y php7.4 \
+                    php-fpm \
+                    php-mysql \
+                    mariadb-client \
+                    curl
 
-RUN apt update ;\
-	apt install -y \
-	wget \
-	php-fpm \
-	nano
+EXPOSE 9000
 
-EXPOSE 9000:9000/tcp
+COPY conf/www.conf /etc/php/7.4/fpm/pool.d/
 
-CMD ["/usr/sbin/php-fpm8.2", "--nodaemonize"]
+RUN mkdir -p /var/www/hmochida/wordpress
+
+RUN mkdir /run/php/
+
+RUN	chown -R root:root /var/www/hmochida/wordpress/
+
+COPY entry.sh /
+ENTRYPOINT ["sh", "/entry.sh"]
+
+CMD ["/usr/sbin/php-fpm7.4", "-F"]
