@@ -1,72 +1,56 @@
-version: '3.8'
+version: "3"
 
 services:
-    mariadb:
-      build: ./requirements/mariadb
-      image: mariadb
-      container_name: MARIADB
-      restart: unless-stopped
-      env_file:
-        - .env
-      ports:
-        - "3306:3306"
-      environment:
-        - "MYSQL_HOST=mariadb:3306"
-        - "MYSQL_DATABASE=wordpress"
-        - "MYSQL_USER=${MYSQL_USER}"
-        - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
-      volumes:
-        - mdb_data:/var/lib/mysql
-      networks:
-        - inception-nw
-
-    nginx:
-      depends_on:
-        - wordpress
-      build: ./requirements/nginx
-      image: nginx
-      container_name: NGINX
-      restart: unless-stopped
-      env_file:
-        - .env
-      environment:
-        - "DOMAIN_NAME=${DOMAIN_NAME}"
-        - "CERTS_=${CERTS_}"
-        - "CERT_KEY_=${CERT_KEY_}"
-      volumes:
-        - wp_data:/var/www/hmochida/wordpress
-      ports:
-        - "443:443"
-      networks:
-        - inception-nw
-
-    wordpress:
-      depends_on:
-            - mariadb
-      build: ./requirements/wordpress
-      image: wordpress
-      container_name: WORDPRESS
-      restart: unless-stopped
-      env_file:
-        - .env
-      environment:
-        - "MYSQL_HOST=mariadb:3306"
-        - "MYSQL_DATABASE=wordpress"
-        - "MYSQL_USER=${MYSQL_USER}"
-        - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
-      volumes:
-        - wp_data:/var/www/hmochida/wordpress
-      ports:
-        - "9000:9000"
-      networks:
-        - inception-nw
-
-volumes:
-    wp_data:
-        external: true
-    mdb_data:
-        external: true
+  mariadb:
+    container_name: mariadb
+    image: mariadb
+    build: ./requirements/mariadb
+    env_file: .env
+    networks:
+      - inception
+    expose:
+      - "3306"
+    volumes:
+      - mdb_data:/var/lib/mysql
+    restart: always
+  
+  wordpress:
+    container_name: wordpress
+    image: wordpress
+    build: ./requirements/wordpress
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+    expose:
+      - "9000"
+    volumes:
+      - wp_data:/var/www/hmochida
+    env_file: .env
+    restart: always
+  
+  nginx:
+    container_name: nginx
+    image: nginx
+    build: ./requirements/nginx
+    networks:
+      - inception
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      - wp_data:/var/www/hmochida
+    env_file: .env
+    restart: always
 
 networks:
-    inception-nw:
-        driver: bridge
+  inception:
+    driver: bridge
+
+volumes:
+  wp_data:
+    external: true
+
+  mdb_data:
+    external: true

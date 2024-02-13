@@ -6,7 +6,7 @@
 #    By: mochida <mochida@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/07 16:43:14 by mochida           #+#    #+#              #
-#    Updated: 2024/02/10 10:19:40 by mochida          ###   ########.fr        #
+#    Updated: 2024/02/12 20:29:22 by mochida          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,12 +17,13 @@
 MARIADB_VOL_DIR = mariadb
 WP_VOL_DIR = wp
 VOL_BASE_DIR = /home/hmochida/data
+USERNAME = hmochida
 
 
-all: directories
+all: directories hosts
 	sudo docker volume create --name mdb_data --opt type=none --opt device=$(VOL_BASE_DIR)/$(MARIADB_VOL_DIR) --opt o=bind
 	sudo docker volume create --name wp_data --opt type=none --opt device=$(VOL_BASE_DIR)/$(WP_VOL_DIR) --opt o=bind
-	cd src && sudo docker-compose up --build
+	cd src && sudo docker-compose up --build -d
 
 directories:
 	@sudo mkdir -p $(VOL_BASE_DIR)
@@ -31,6 +32,9 @@ directories:
 	@mkdir -p $(VOL_BASE_DIR)/$(WP_VOL_DIR)
 
 clean: fclean
+
+hosts:
+	grep -qE '127.0.0.1[[:space:]]+$(USERNAME).42.fr' /etc/hosts || echo '127.0.0.1 $(USERNAME).42.fr' | sudo tee -a /etc/hosts
 
 fclean:
 		cd src && sudo docker-compose down
