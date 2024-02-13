@@ -6,7 +6,7 @@
 #    By: mochida <mochida@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/07 16:43:14 by mochida           #+#    #+#              #
-#    Updated: 2024/02/12 20:29:22 by mochida          ###   ########.fr        #
+#    Updated: 2024/02/12 21:21:58 by mochida          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,6 +24,10 @@ all: directories hosts
 	sudo docker volume create --name mdb_data --opt type=none --opt device=$(VOL_BASE_DIR)/$(MARIADB_VOL_DIR) --opt o=bind
 	sudo docker volume create --name wp_data --opt type=none --opt device=$(VOL_BASE_DIR)/$(WP_VOL_DIR) --opt o=bind
 	cd src && sudo docker-compose up --build -d
+
+
+first:
+	sudo ./src/tools//firstrun.sh
 
 directories:
 	@sudo mkdir -p $(VOL_BASE_DIR)
